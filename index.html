@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>正在連線...</title>
+</head>
+
+<body>
+
+    <h2>正在取得連線資訊...</h2>
+
+    <script>
+
+        async function redirectToTunnel() {
+
+            try {
+
+                // 取得 GitHub 上的 config.json
+                const response = await fetch(
+                    "./config.json?t=" + Date.now(),
+                    {
+                        cache: "no-store"
+                    }
+                );
+
+                // HTTP 錯誤
+                if (!response.ok) {
+                    throw new Error("無法取得 config.json");
+                }
+
+                // 轉成 JSON
+                const config = await response.json();
+
+                // 檢查網址
+                if (!config.url) {
+                    document.body.innerHTML = `
+                        <h2>目前沒有 Tunnel URL</h2>
+                    `;
+                    return;
+                }
+
+                // 檢查是不是 HTTP / HTTPS
+                if (
+                    !config.url.startsWith("https://") &&
+                    !config.url.startsWith("http://")
+                ) {
+                    throw new Error("Tunnel URL 格式錯誤");
+                }
+
+                // 自動跳轉
+                window.location.replace(config.url);
+
+            } catch (error) {
+
+                console.error(error);
+
+                document.body.innerHTML = `
+                    <h2>連線失敗</h2>
+                    <p>${error.message}</p>
+                `;
+            }
+        }
+
+        // 執行
+        redirectToTunnel();
+
+    </script>
+
+</body>
+
+</html>
